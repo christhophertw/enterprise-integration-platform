@@ -28,3 +28,9 @@
 **Status:** Accepted
 **Decision:** Separate HTTP handlers, persistence models, schemas and DB setup without premature microservices.
 **Trade-offs:** Faster iteration; introduce services and repositories as business complexity justifies them.
+
+## ADR-006 — Independent product master data
+**Status:** Accepted (v0.2)
+**Context:** Products must exist independently of customers, sales/purchase orders, and inventory transactions.
+**Decision:** Introduce a Product entity with unique normalized SKU, name, nonnegative decimal reference price, and active flag. Do not store stock balance on Product.
+**Trade-offs:** Simple MVP catalog; currency, price lists, units of measure, warehouses, and inventory movements will be modeled separately in later iterations. SKU normalization to uppercase is an explicit API policy.

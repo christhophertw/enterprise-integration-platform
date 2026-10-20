@@ -6,8 +6,8 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .database import Base, engine, get_db
-from .models import Customer
-from .schemas import CustomerCreate, CustomerRead
+from .models import Customer, Product
+from .schemas import CustomerCreate, CustomerRead, ProductCreate, ProductRead
 
 
 @asynccontextmanager
@@ -17,7 +17,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Enterprise Integration Platform", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="Enterprise Integration Platform", version="0.2.0", lifespan=lifespan)
 
 
 @app.get("/health")
@@ -51,3 +51,29 @@ def get_customer(customer_id: int, db: Session = Depends(get_db)) -> Customer:
     if customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
+
+
+@app.post("/products", response_model=ProductRead, status_code=status.HTTP_201_CREATED)
+def create_product(payload: ProductCreate, db: Session = Depends(get_db)) -> Product:
+    product = Product(**payload.model_dump())
+    db.add(product)
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Product SKU already exists") from None
+    db.refresh(product)
+    return product
+
+
+@app.get("/products", response_model=list[ProductRead])
+def list_products(db: Session = Depends(get_db)) -> list[Product]:
+    return list(db.scalars(select(Product).order_by(Product.id)).all())
+
+
+@app.get("/products/{product_id}", response_model=ProductRead)
+def get_product(product_id: int, db: Session = Depends(get_db)) -> Product:
+    product = db.get(Product, product_id)
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
