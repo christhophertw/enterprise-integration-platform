@@ -16,3 +16,10 @@
 - Added GitHub Actions workflow to run backend pytest on pushes to main/ci branches and pull requests targeting main.
 - CI workflow results must be verified in GitHub Actions after pushing.
 - Next: evaluate PostgreSQL integration tests, migrations, and additional ERP entities.
+
+## v0.2.0 — Product catalog (proposed)
+- Added Product ORM entity, validated request/response schemas, and create/list/get endpoints.
+- Added tests for product creation, retrieval, SKU normalization, duplicate prevention, and invalid pricing.
+- Product is independent of customers and stock balances; see ADR-006.
+- CI validation pending; do not merge until GitHub Actions passes.
+- Schema creation still uses MVP create_all; Alembic migrations remain planned before production.
