@@ -1,0 +1,10 @@
+services:
+  tests:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.test
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    command: python -m pytest -v
